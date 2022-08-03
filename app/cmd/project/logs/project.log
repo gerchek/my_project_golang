@@ -1,4 +1,2 @@
-time="2022-08-02T15:30:59+05:00" level=warning msg=hi func="main.main()" file="/home/ata/my_project/app/cmd/project/main.go:7"
-time="2022-08-02T15:30:59+05:00" level=warning msg=bye func="main.test()" file="/home/ata/my_project/app/cmd/project/main.go:13"
-time="2022-08-02T15:33:28+05:00" level=warning msg=hi func="main.main()" file="/home/ata/my_project/app/cmd/project/main.go:7"
-time="2022-08-02T15:33:28+05:00" level=warning msg=bye func="main.test()" file="/home/ata/my_project/app/cmd/project/main.go:13"
+time="2022-08-03T10:22:40+05:00" level=info msg="main function" func="main.main()" file="/home/ata/my_project/app/cmd/project/main.go:12"
+time="2022-08-03T10:22:40+05:00" level=info msg="new_project function" func="my_project/internal/project.NewProject()" file="/home/ata/my_project/app/internal/project/project.go:7"

@@ -6,6 +6,7 @@ import (
 	"my_project/internal/setup/constructor"
 	"my_project/pkg/gormclient"
 	"my_project/pkg/logging"
+	customRedis "my_project/pkg/redis"
 )
 
 func main() {
@@ -24,15 +25,15 @@ func main() {
 		fmt.Println(client)
 	}
 
-	// logger.Info("initializing redis config...")
-	// redisConfig := customRedis.NewRedisConfig("localhost:6379")
+	logger.Info("initializing redis config...")
+	redisConfig := customRedis.NewRedisConfig("localhost:6379")
 
-	// logger.Info("connecting to redis database...")
-	// redisClient := customRedis.NewRedisClient(redisConfig)
+	logger.Info("connecting to redis database...")
+	redisClient := customRedis.NewRedisClient(redisConfig)
 
 	logger.Info("setting up all repository, service, controller...")
 
-	constructor.SetConstructor(client, logger)
+	constructor.SetConstructor(client, redisClient, logger)
 
 	logger.Info("initializing a new app...")
 	app := app.NewApp(logger)

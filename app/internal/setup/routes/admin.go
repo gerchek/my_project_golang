@@ -9,5 +9,5 @@ import (
 
 func SetAllAdminRoutes(app *fiber.App) {
 	adminApi := app.Group("/admin", middleware.CheckAdminAPIToken)
-	adminApi.Get("/login", adminConstructor.Test)
+	adminApi.Get("/login", adminConstructor.AdminController.Test)
 }

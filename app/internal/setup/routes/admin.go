@@ -13,6 +13,7 @@ func SetAllAdminRoutes(app *fiber.App, redisClient *redis.Client) {
 	adminApi.Get("/all", adminConstructor.AdminController.All)
 	adminApi.Post("/register", adminConstructor.AdminController.Create)
 	adminApi.Post("/login", adminConstructor.AdminController.Login)
+	adminApi.Post("/refresh", adminConstructor.AdminController.Refresh)
 
 	adminApi.Get("/logout", middleware.IsAdminAuthenticate(redisClient), adminConstructor.AdminController.Logout)
 

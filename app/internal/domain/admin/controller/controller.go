@@ -23,6 +23,7 @@ type AdminController interface {
 	Create(ctx *fiber.Ctx) error
 	Login(ctx *fiber.Ctx) error
 	Logout(ctx *fiber.Ctx) error
+	Refresh(ctx *fiber.Ctx) error
 }
 
 type adminController struct {
@@ -96,10 +97,12 @@ func (c *adminController) Login(ctx *fiber.Ctx) error {
 		res := response.Error("Invalid credentials", "Invalid credentials", nil)
 		return ctx.Status(http.StatusBadRequest).JSON(res)
 	}
-	user_id := strconv.FormatUint(uint64(userdata.ID), 10)
+	// user_id := strconv.FormatUint(uint64(userdata.ID), 10)
 	// fmt.Println(reflect.TypeOf(s))
 
-	createJwtToken, err := jService.CreateToken(user_id)
+	// createJwtToken, err := jService.CreateToken(user_id)
+	createJwtToken, err := c.jwtAdminService.CreateToken(strconv.FormatUint(uint64(userdata.ID), 10), userdata.Username)
+
 	if err != nil {
 		res := response.Error("Token doredilmedi", "Token doredilmedi", nil)
 		return ctx.Status(http.StatusBadRequest).JSON(res)
@@ -131,6 +134,79 @@ func (c *adminController) Logout(ctx *fiber.Ctx) error {
 			return ctx.Status(http.StatusInternalServerError).JSON(res)
 		}
 		res := response.Success(true, "OK", nil)
+		return ctx.Status(http.StatusOK).JSON(res)
+	}
+	res := response.Error("Invalid token", err.Error(), nil)
+	return ctx.Status(http.StatusBadRequest).JSON(res)
+}
+
+//REFRESH TOKEN
+func (c *adminController) Refresh(ctx *fiber.Ctx) error {
+	var adminRefreshTokenDTO dto.RefreshTokenDTO
+	err := ctx.BodyParser(&adminRefreshTokenDTO)
+	if err != nil {
+		res := response.Error("Error", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	err = customvalidator.ValidateStruct(adminRefreshTokenDTO)
+	if err != nil {
+		res := response.Error("Validation error", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+
+	token, err := c.jwtAdminService.ValidateAdminRefreshToken(adminRefreshTokenDTO.RefreshToken)
+	if err != nil {
+		res := response.Error("Error", err.Error(), nil)
+		return ctx.Status(http.StatusInternalServerError).JSON(res)
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		refreshUuid, ok := claims["refresh_uuid"].(string)
+		if !ok {
+			res := response.Error("Error", err.Error(), nil)
+			return ctx.Status(http.StatusInternalServerError).JSON(res)
+		}
+		userId, ok := claims["user_id"].(string)
+		if !ok {
+			res := response.Error("Error", err.Error(), nil)
+			return ctx.Status(http.StatusInternalServerError).JSON(res)
+		}
+		username, ok := claims["username"].(string)
+		if !ok {
+			res := response.Error("Error", err.Error(), nil)
+			return ctx.Status(http.StatusInternalServerError).JSON(res)
+		}
+		deleted, err := c.service.DeleteAuth(refreshUuid)
+		if err != nil || deleted == 0 {
+			res := response.Error("Error", err.Error(), nil)
+			return ctx.Status(http.StatusInternalServerError).JSON(res)
+		}
+
+		// createJwtToken, err := jService.CreateToken(user_id)
+
+		generatedToken, err := c.jwtAdminService.CreateToken(userId, username)
+		// user_id := strconv.FormatUint(uint64(userdata.ID), 10)
+		// fmt.Println(reflect.TypeOf(s))
+
+		// generatedToken, err := jService.CreateToken(user_id)
+
+		if err != nil {
+			res := response.Error("Error", err.Error(), nil)
+			return ctx.Status(http.StatusInternalServerError).JSON(res)
+		}
+		err = c.service.CreateAuth(userId, generatedToken)
+		if err != nil {
+			res := response.Error("Error", err.Error(), nil)
+			return ctx.Status(http.StatusInternalServerError).JSON(res)
+		}
+		user, err := c.service.FindByUsername(username)
+		if err != nil {
+			res := response.Error("Error", err.Error(), nil)
+			return ctx.Status(http.StatusNotFound).JSON(res)
+		}
+		user.AccessToken = generatedToken.AccessToken
+		user.RefreshToken = generatedToken.RefreshToken
+		res := response.Success(true, "OK", user)
 		return ctx.Status(http.StatusOK).JSON(res)
 	}
 	res := response.Error("Invalid token", err.Error(), nil)

@@ -85,8 +85,8 @@ func (s *adminService) CreateAuth(userID string, td *model.TokenDetails) error {
 
 }
 
-func (s *adminService) DeleteAuth(accessUuid string) (int64, error) {
-	deleted, _ := s.redisClient.Del(context.Background(), accessUuid).Result()
+func (s *adminService) DeleteAuth(refreshUuid string) (int64, error) {
+	deleted, _ := s.redisClient.Del(context.Background(), refreshUuid).Result()
 	if deleted == 0 {
 		return 0, errors.New("key doesn't exists")
 	}

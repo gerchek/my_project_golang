@@ -13,24 +13,25 @@ import (
 type JWTAdminService interface {
 	// GenerateAdminToken(userID, username string) (*model.AdminTokenDetails, error)
 	ValidateAdminAccessToken(token string) (*jwt.Token, error)
-	// ValidateAdminRefreshToken(token string) (*jwt.Token, error)
+	ValidateAdminRefreshToken(token string) (*jwt.Token, error)
+	CreateToken(userid string, username string) (*model.TokenDetails, error)
 }
 
 type jwtAdminService struct {
 	// issuer                string
-	secretKeyAccessToken string
-	// secretKeyRefreshToken string
+	secretKeyAccessToken  string
+	secretKeyRefreshToken string
 }
 
 func NewJWTAdminService() JWTAdminService {
 	return &jwtAdminService{
 		// issuer:                "e.gov.tm/api/portal/panel",
-		secretKeyAccessToken: "my_project_access_secret",
-		// secretKeyRefreshToken: "d3124eb8e864ec7db4808cf2799e576ebf8ccbec4623543316ecf46f2be46f3d",
+		secretKeyAccessToken:  "my_project_access_secret",
+		secretKeyRefreshToken: "my_project_access_secret",
 	}
 }
 
-func CreateToken(userid string) (*model.TokenDetails, error) {
+func (j *jwtAdminService) CreateToken(userid string, username string) (*model.TokenDetails, error) {
 	td := &model.TokenDetails{}
 	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
 	// td.AccessUuid = uuid.NewV4().String()
@@ -56,6 +57,7 @@ func CreateToken(userid string) (*model.TokenDetails, error) {
 	atClaims["authorized"] = true
 	atClaims["access_uuid"] = td.AccessUuid
 	atClaims["user_id"] = userid
+	atClaims["username"] = username
 	atClaims["exp"] = td.AtExpires
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	td.AccessToken, err = at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
@@ -67,6 +69,7 @@ func CreateToken(userid string) (*model.TokenDetails, error) {
 	rtClaims := jwt.MapClaims{}
 	rtClaims["refresh_uuid"] = td.RefreshUuid
 	rtClaims["user_id"] = userid
+	rtClaims["username"] = username
 	rtClaims["exp"] = td.RtExpires
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 	td.RefreshToken, err = rt.SignedString([]byte(os.Getenv("REFRESH_SECRET")))
@@ -83,5 +86,14 @@ func (j *jwtAdminService) ValidateAdminAccessToken(token string) (*jwt.Token, er
 			return nil, fmt.Errorf("unexpected signing method %v", t_.Header["alg"])
 		}
 		return []byte(j.secretKeyAccessToken), nil
+	})
+}
+
+func (j *jwtAdminService) ValidateAdminRefreshToken(token string) (*jwt.Token, error) {
+	return jwt.Parse(token, func(t_ *jwt.Token) (interface{}, error) {
+		if _, ok := t_.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method %v", t_.Header["alg"])
+		}
+		return []byte(j.secretKeyRefreshToken), nil
 	})
 }

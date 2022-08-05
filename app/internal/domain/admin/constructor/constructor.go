@@ -14,7 +14,6 @@ var (
 	AdminRepository storage.AdminStorage
 	adminService    service.AdminService
 	JwtAdminService jService.JWTAdminService
-
 	AdminController controller.AdminController
 )
 

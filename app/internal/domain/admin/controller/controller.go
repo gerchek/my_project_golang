@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"my_project/internal/domain/admin/dto"
 	"my_project/internal/domain/admin/service"
 	"my_project/internal/utils/customvalidator"
@@ -32,7 +31,6 @@ type adminController struct {
 }
 
 func NewAdminController(service service.AdminService, jwtAdminService jService.JWTAdminService) AdminController {
-	fmt.Println("domain/admin/controller/NewAdminController")
 	return &adminController{
 		service:         service,
 		jwtAdminService: jwtAdminService,

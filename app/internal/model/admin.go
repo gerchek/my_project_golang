@@ -12,7 +12,7 @@ type Admin struct {
 	RefreshToken string    `gorm:"-" json:"refresh_token,omitempty"`
 	CreatedAt    time.Time `json:"-"`
 	UpdatedAt    time.Time `json:"-"`
-	// Roles        []Role       `gorm:"many2many:admin_roles" json:"roles,omitempty"`
+	Roles        []Role    `gorm:"many2many:admins_roles" json:"roles,omitempty"`
 	// Permissions  []Permission `gorm:"many2many:admin_permissions" json:"permissions,omitempty"`
 }
 

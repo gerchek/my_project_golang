@@ -2,6 +2,8 @@ package routes
 
 import (
 	adminConstructor "my_project/internal/domain/admin/constructor"
+	roleConstructor "my_project/internal/domain/role/constructor"
+
 	"my_project/internal/middleware"
 
 	"github.com/go-redis/redis/v8"
@@ -9,12 +11,22 @@ import (
 )
 
 func SetAllAdminRoutes(app *fiber.App, redisClient *redis.Client) {
-	adminApi := app.Group("/admin", middleware.CheckAdminAPIToken)
-	adminApi.Get("/all", adminConstructor.AdminController.All)
-	adminApi.Post("/register", adminConstructor.AdminController.Create)
-	adminApi.Post("/login", adminConstructor.AdminController.Login)
-	adminApi.Post("/refresh", adminConstructor.AdminController.Refresh)
+	adminApi := app.Group("/api/", middleware.CheckAdminAPIToken)
 
-	adminApi.Get("/logout", middleware.IsAdminAuthenticate(redisClient), adminConstructor.AdminController.Logout)
+	// auth routes
+	adminAuth := adminApi.Group("/admin")
+	adminAuth.Get("/all", adminConstructor.AdminController.All)
+	adminAuth.Post("/register", adminConstructor.AdminController.Create)
+	adminAuth.Post("/login", adminConstructor.AdminController.Login)
+	adminAuth.Post("/refresh", adminConstructor.AdminController.Refresh)
+
+	adminAuth.Get("/logout", middleware.IsAdminAuthenticate(redisClient), adminConstructor.AdminController.Logout)
+
+	// role routes
+	role := adminApi.Group("/role")
+	role.Get("/all", roleConstructor.RoleController.All)
+	role.Post("/create", roleConstructor.RoleController.Create)
+	role.Post("/update/:id", roleConstructor.RoleController.Update)
+	role.Delete("/delete/:id", roleConstructor.RoleController.Delete)
 
 }

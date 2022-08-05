@@ -54,7 +54,7 @@ func (s *adminService) Create(adminDTO *dto.AdminDTO) error {
 		FirstName: adminDTO.FirstName,
 		LastName:  adminDTO.LastName,
 		Password:  string(password),
-		// Roles:       adminDTO.Roles,
+		Roles:     adminDTO.Roles,
 		// Permissions: adminDTO.Permissions,
 	}
 

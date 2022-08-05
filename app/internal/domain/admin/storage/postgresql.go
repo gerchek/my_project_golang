@@ -23,10 +23,8 @@ func NewAdminStorage(client *gorm.DB) AdminStorage {
 }
 
 func (as *adminStorage) All() []*model.Admin {
-	// a := "domain/admin/service/All()"
 	var admins []*model.Admin
-	// res := as.client.Find(&admins)
-	as.client.Find(&admins)
+	as.client.Preload("Roles").Find(&admins)
 	return admins
 }
 
@@ -38,7 +36,7 @@ func (as *adminStorage) FindByUsername(admin *model.Admin, username string) erro
 }
 
 func (as *adminStorage) Create(admin *model.Admin) error {
-	if err := as.client.Create(admin).Error; err != nil {
+	if err := as.client.Omit("Roles.*").Create(admin).Error; err != nil {
 		return err
 	}
 	return nil

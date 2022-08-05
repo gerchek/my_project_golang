@@ -6,11 +6,12 @@ import (
 	"my_project/internal/setup/routes"
 	"my_project/internal/utils/response"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 )
 
-func NewApp(logger *logrus.Logger) (app *fiber.App) {
+func NewApp(logger *logrus.Logger, redisClient *redis.Client) (app *fiber.App) {
 
 	app = fiber.New(fiber.Config{
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
@@ -37,7 +38,7 @@ func NewApp(logger *logrus.Logger) (app *fiber.App) {
 
 	// fmt.Println(redisClient)
 
-	routes.SetAllAdminRoutes(app)
+	routes.SetAllAdminRoutes(app, redisClient)
 
 	return app
 }

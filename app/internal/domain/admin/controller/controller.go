@@ -2,30 +2,137 @@ package controller
 
 import (
 	"fmt"
+	"my_project/internal/domain/admin/dto"
 	"my_project/internal/domain/admin/service"
+	"my_project/internal/utils/customvalidator"
+	"my_project/internal/utils/functions"
+	"my_project/internal/utils/response"
 	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/dgrijalva/jwt-go"
+
+	jService "my_project/pkg/jwt"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type AdminController interface {
-	Test(ctx *fiber.Ctx) error
+	All(ctx *fiber.Ctx) error
+	Create(ctx *fiber.Ctx) error
+	Login(ctx *fiber.Ctx) error
+	Logout(ctx *fiber.Ctx) error
 }
 
 type adminController struct {
-	service service.AdminService
+	service         service.AdminService
+	jwtAdminService jService.JWTAdminService
 }
 
-func NewAdminController(service service.AdminService) AdminController {
+func NewAdminController(service service.AdminService, jwtAdminService jService.JWTAdminService) AdminController {
 	fmt.Println("domain/admin/controller/NewAdminController")
 	return &adminController{
-		service: service,
+		service:         service,
+		jwtAdminService: jwtAdminService,
 	}
 }
 
-func (c *adminController) Test(ctx *fiber.Ctx) error {
+func (c *adminController) All(ctx *fiber.Ctx) error {
 
 	result := c.service.All()
 	return ctx.Status(http.StatusOK).JSON(result)
 
+}
+
+//CREATE Admin user
+func (c *adminController) Create(ctx *fiber.Ctx) error {
+	var adminCreateDTO dto.AdminDTO
+	err := ctx.BodyParser(&adminCreateDTO)
+	if err != nil {
+		res := response.Error("Bad request", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	err = customvalidator.ValidateStruct(&adminCreateDTO)
+	if err != nil {
+		res := response.Error("Validation error", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	_, err = c.service.FindByUsername(adminCreateDTO.Username)
+	if err == nil {
+		res := response.Error("Bu ulanyjy ady öňem bar", "Bu ulanyjy ady öňem bar", nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	err = c.service.Create(&adminCreateDTO)
+	if err != nil {
+		res := response.Error("Couldn't create", err.Error(), nil)
+		return ctx.Status(http.StatusInternalServerError).JSON(res)
+	}
+
+	res := response.Success(true, "Success", nil)
+	return ctx.Status(http.StatusOK).JSON(res)
+}
+
+//Login Admin user
+func (c *adminController) Login(ctx *fiber.Ctx) error {
+	var adminLoginDTO dto.AdminLoginDTO
+	err := ctx.BodyParser(&adminLoginDTO)
+	if err != nil {
+		res := response.Error("Bad request", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	err = customvalidator.ValidateStruct(&adminLoginDTO)
+	if err != nil {
+		res := response.Error("Validation error", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	userdata, err := c.service.FindByUsername(adminLoginDTO.Username)
+	if err != nil {
+		res := response.Error("Bu ulanyjy yok", "Bu ulanyjy yok", nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	comparedPassword := functions.ComparePassword(userdata.Password, []byte(adminLoginDTO.Password))
+	if !comparedPassword {
+		res := response.Error("Invalid credentials", "Invalid credentials", nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	user_id := strconv.FormatUint(uint64(userdata.ID), 10)
+	// fmt.Println(reflect.TypeOf(s))
+
+	createJwtToken, err := jService.CreateToken(user_id)
+	if err != nil {
+		res := response.Error("Token doredilmedi", "Token doredilmedi", nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	c.service.CreateAuth(strconv.FormatUint(userdata.ID, 10), createJwtToken)
+	return ctx.Status(http.StatusOK).JSON(createJwtToken)
+
+}
+
+//LOGOUT ADMIN
+func (c *adminController) Logout(ctx *fiber.Ctx) error {
+	authHeader := ctx.Get("Authorization")
+	headerParts := strings.Split(authHeader, " ")
+	token, err := c.jwtAdminService.ValidateAdminAccessToken(headerParts[1])
+	if err != nil {
+		res := response.Error("Error", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		accessUuid, ok := claims["access_uuid"].(string)
+		if !ok {
+			res := response.Error("Error", err.Error(), nil)
+			return ctx.Status(http.StatusUnauthorized).JSON(res)
+		}
+		deleted, err := c.service.DeleteAuth(accessUuid)
+		if err != nil || deleted == 0 {
+			res := response.Error("Error", "errror", nil)
+			return ctx.Status(http.StatusInternalServerError).JSON(res)
+		}
+		res := response.Success(true, "OK", nil)
+		return ctx.Status(http.StatusOK).JSON(res)
+	}
+	res := response.Error("Invalid token", err.Error(), nil)
+	return ctx.Status(http.StatusBadRequest).JSON(res)
 }

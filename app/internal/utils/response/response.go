@@ -9,6 +9,17 @@ type Response struct {
 	Data    interface{} `json:"data"`
 }
 
+type EmptyObject struct{}
+
+func Success(status bool, message string, data interface{}) Response {
+	return Response{
+		Status:  status,
+		Message: message,
+		Errors:  nil,
+		Data:    data,
+	}
+}
+
 func Error(message string, err string, data interface{}) Response {
 	spError := strings.Split(err, "\n")
 	return Response{

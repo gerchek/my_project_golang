@@ -36,7 +36,7 @@ func main() {
 	constructor.SetConstructor(client, redisClient, logger)
 
 	logger.Info("initializing a new app...")
-	app := app.NewApp(logger)
+	app := app.NewApp(logger, redisClient)
 
 	logger.Fatal(app.Listen(":3000"))
 

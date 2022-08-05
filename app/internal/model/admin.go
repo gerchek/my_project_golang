@@ -15,3 +15,12 @@ type Admin struct {
 	// Roles        []Role       `gorm:"many2many:admin_roles" json:"roles,omitempty"`
 	// Permissions  []Permission `gorm:"many2many:admin_permissions" json:"permissions,omitempty"`
 }
+
+type TokenDetails struct {
+	AccessToken  string
+	RefreshToken string
+	AccessUuid   string
+	RefreshUuid  string
+	AtExpires    int64
+	RtExpires    int64
+}

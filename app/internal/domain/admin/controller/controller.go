@@ -21,6 +21,8 @@ type AdminController interface {
 	All(ctx *fiber.Ctx) error
 	Create(ctx *fiber.Ctx) error
 	Login(ctx *fiber.Ctx) error
+	Update(ctx *fiber.Ctx) error
+
 	Logout(ctx *fiber.Ctx) error
 	Refresh(ctx *fiber.Ctx) error
 }
@@ -209,4 +211,37 @@ func (c *adminController) Refresh(ctx *fiber.Ctx) error {
 	}
 	res := response.Error("Invalid token", err.Error(), nil)
 	return ctx.Status(http.StatusBadRequest).JSON(res)
+}
+
+//UPDATE Admin user
+func (c *adminController) Update(ctx *fiber.Ctx) error {
+	var adminUpdateDTO dto.AdminDTO
+	id, err := ctx.ParamsInt("id")
+	if err != nil {
+		res := response.Error("Error", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	if id == 0 {
+		res := response.Error("Error", "Invalid parameter", nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+
+	err = ctx.BodyParser(&adminUpdateDTO)
+	if err != nil {
+		res := response.Error("Bad request", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+	err = customvalidator.ValidateStruct(&adminUpdateDTO)
+	if err != nil {
+		res := response.Error("Validation error", err.Error(), nil)
+		return ctx.Status(http.StatusBadRequest).JSON(res)
+	}
+
+	err = c.service.Update(&adminUpdateDTO, id)
+	if err != nil {
+		res := response.Error("Couldn't update", err.Error(), nil)
+		return ctx.Status(http.StatusInternalServerError).JSON(res)
+	}
+	res := response.Success(true, "Success", nil)
+	return ctx.Status(http.StatusOK).JSON(res)
 }

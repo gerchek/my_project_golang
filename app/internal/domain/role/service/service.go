@@ -36,7 +36,7 @@ func (s *roleService) All() []*model.Role {
 func (s *roleService) Create(roleDTO *dto.RoleDTO) error {
 	admin := &model.Role{
 		Name:        roleDTO.Name,
-		Permissions: roleDTO.Permissions,
+		Permissions: roleDTO.Permissions_append,
 	}
 
 	err := s.storage.Create(admin)
@@ -56,7 +56,7 @@ func (s *roleService) Update(roleDTO *dto.RoleDTO, id int) error {
 		return err
 	}
 	oldRole.Name = roleDTO.Name
-	err = s.storage.Update(&oldRole)
+	err = s.storage.Update(&oldRole, roleDTO)
 	if err != nil {
 		return err
 	}

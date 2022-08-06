@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"fmt"
+	"my_project/internal/domain/role/dto"
 	"my_project/internal/model"
 
 	"gorm.io/gorm"
@@ -10,7 +12,7 @@ import (
 type RoleStorage interface {
 	All() []*model.Role
 	Create(role *model.Role) error
-	Update(role *model.Role) error
+	Update(role *model.Role, roleDTO *dto.RoleDTO) error
 	Delete(role *model.Role) error
 	FindByID(role *model.Role, id int) error
 }
@@ -45,9 +47,12 @@ func (rs *roleStorage) FindByID(role *model.Role, id int) error {
 	return nil
 }
 
-func (rs *roleStorage) Update(role *model.Role) error {
-	if err := rs.client.Save(role).Error; err != nil {
-		return err
+func (rs *roleStorage) Update(role *model.Role, roleDTO *dto.RoleDTO) error {
+	if err := rs.client.Save(role).Association("Permissions").Append(roleDTO.Permissions_append); err != nil {
+		fmt.Println(err.Error())
+	}
+	if err := rs.client.Model(&role).Association("Permissions").Delete(roleDTO.Permissions_delete); err != nil {
+		fmt.Println(err.Error())
 	}
 	return nil
 }

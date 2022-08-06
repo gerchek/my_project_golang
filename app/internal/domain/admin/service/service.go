@@ -16,6 +16,7 @@ type AdminService interface {
 	All() []*model.Admin
 	FindByUsername(username string) (*model.Admin, error)
 	Create(adminDTO *dto.AdminDTO) error
+	Update(adminDTO *dto.AdminDTO, id int) error
 
 	CreateAuth(userID string, td *model.TokenDetails) error
 	DeleteAuth(accessUuid string) (int64, error)
@@ -54,7 +55,7 @@ func (s *adminService) Create(adminDTO *dto.AdminDTO) error {
 		FirstName: adminDTO.FirstName,
 		LastName:  adminDTO.LastName,
 		Password:  string(password),
-		Roles:     adminDTO.Roles,
+		Roles:     adminDTO.Roles_append,
 		// Permissions: adminDTO.Permissions,
 	}
 
@@ -91,4 +92,32 @@ func (s *adminService) DeleteAuth(refreshUuid string) (int64, error) {
 		return 0, errors.New("key doesn't exists")
 	}
 	return deleted, nil
+}
+
+//Admin user UPDATE
+func (s *adminService) Update(adminDTO *dto.AdminDTO, id int) error {
+	var oldAdmin model.Admin
+	err := s.storage.FindByID(&oldAdmin, id)
+	if err != nil {
+		return err
+	}
+	// s.storage.DeleteAdminRoles(&oldAdmin)
+	// s.storage.DeleteAdminPermissions(&oldAdmin)
+
+	password := oldAdmin.Password
+
+	oldAdmin.Username = adminDTO.Username
+	oldAdmin.FirstName = adminDTO.FirstName
+	oldAdmin.LastName = adminDTO.LastName
+	if adminDTO.Password != nil {
+		password, _ := bcrypt.GenerateFromPassword([]byte(*adminDTO.Password), 10)
+		oldAdmin.Password = string(password)
+	} else {
+		oldAdmin.Password = password
+	}
+	err = s.storage.Update(&oldAdmin, adminDTO)
+	if err != nil {
+		return err
+	}
+	return nil
 }

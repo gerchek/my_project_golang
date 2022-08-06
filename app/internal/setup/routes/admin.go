@@ -20,6 +20,7 @@ func SetAllAdminRoutes(app *fiber.App, redisClient *redis.Client) {
 	adminAuth.Post("/register", adminConstructor.AdminController.Create)
 	adminAuth.Post("/login", adminConstructor.AdminController.Login)
 	adminAuth.Post("/refresh", adminConstructor.AdminController.Refresh)
+	adminAuth.Post("/update/:id", middleware.IsAdminAuthenticate(redisClient), adminConstructor.AdminController.Update)
 
 	adminAuth.Get("/logout", middleware.IsAdminAuthenticate(redisClient), adminConstructor.AdminController.Logout)
 
@@ -27,7 +28,6 @@ func SetAllAdminRoutes(app *fiber.App, redisClient *redis.Client) {
 	role := adminApi.Group("/role")
 	role.Get("/all", roleConstructor.RoleController.All)
 	role.Post("/create", roleConstructor.RoleController.Create)
-	role.Post("/update/:id", roleConstructor.RoleController.Update)
 	role.Delete("/delete/:id", roleConstructor.RoleController.Delete)
 
 	// permission routes

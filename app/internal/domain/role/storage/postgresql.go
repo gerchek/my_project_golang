@@ -27,12 +27,12 @@ func NewRoleStorage(client *gorm.DB) RoleStorage {
 
 func (rs *roleStorage) All() []*model.Role {
 	var roles []*model.Role
-	rs.client.Preload("Admins").Find(&roles)
+	rs.client.Preload("Admins").Preload("Permissions").Find(&roles)
 	return roles
 }
 
 func (rs *roleStorage) Create(role *model.Role) error {
-	if err := rs.client.Create(role).Error; err != nil {
+	if err := rs.client.Omit("Permissions.*").Create(role).Error; err != nil {
 		return err
 	}
 	return nil

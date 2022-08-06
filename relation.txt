@@ -1,0 +1,2 @@
+1) admins - roles -> many2many
+2) roles - permissions ->onetomany

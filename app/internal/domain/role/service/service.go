@@ -35,7 +35,8 @@ func (s *roleService) All() []*model.Role {
 
 func (s *roleService) Create(roleDTO *dto.RoleDTO) error {
 	admin := &model.Role{
-		Name: roleDTO.Name,
+		Name:        roleDTO.Name,
+		Permissions: roleDTO.Permissions,
 	}
 
 	err := s.storage.Create(admin)

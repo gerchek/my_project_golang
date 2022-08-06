@@ -2,6 +2,7 @@ package routes
 
 import (
 	adminConstructor "my_project/internal/domain/admin/constructor"
+	permissionConstructor "my_project/internal/domain/permission/constructor"
 	roleConstructor "my_project/internal/domain/role/constructor"
 
 	"my_project/internal/middleware"
@@ -28,5 +29,10 @@ func SetAllAdminRoutes(app *fiber.App, redisClient *redis.Client) {
 	role.Post("/create", roleConstructor.RoleController.Create)
 	role.Post("/update/:id", roleConstructor.RoleController.Update)
 	role.Delete("/delete/:id", roleConstructor.RoleController.Delete)
+
+	// permission routes
+	permission := adminApi.Group("/permission")
+	permission.Get("/all", permissionConstructor.PermissionController.All)
+	permission.Post("/create", permissionConstructor.PermissionController.Create)
 
 }

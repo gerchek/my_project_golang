@@ -29,7 +29,6 @@ func NewRoleService(storage storage.RoleStorage, redisClient *redis.Client) Role
 }
 
 func (s *roleService) All() []*model.Role {
-	// a := s.storage.Test()
 	return s.storage.All()
 }
 

@@ -13,6 +13,7 @@ type Admin struct {
 	CreatedAt    time.Time `json:"-"`
 	UpdatedAt    time.Time `json:"-"`
 	Roles        []Role    `gorm:"many2many:admins_roles" json:"roles,omitempty"`
+	Products     []Product `gorm:"ForeignKey:AdminID"`
 	// Permissions  []Permission `gorm:"many2many:admin_permissions" json:"permissions,omitempty"`
 }
 

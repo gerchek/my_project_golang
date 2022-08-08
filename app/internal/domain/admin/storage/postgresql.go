@@ -29,7 +29,7 @@ func NewAdminStorage(client *gorm.DB) AdminStorage {
 
 func (as *adminStorage) All() []*model.Admin {
 	var admins []*model.Admin
-	as.client.Preload("Products").Preload("Roles.Permissions").Preload("Roles").Find(&admins)
+	as.client.Preload("MyComments").Preload("MyProducts.Comments").Preload("Roles.Permissions").Preload("Roles").Find(&admins)
 	return admins
 }
 

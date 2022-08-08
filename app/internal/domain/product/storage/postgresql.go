@@ -27,7 +27,7 @@ func NewProductStorage(client *gorm.DB) ProductStorage {
 
 func (ps *productStorage) All() []*model.Product {
 	var products []*model.Product
-	ps.client.Find(&products)
+	ps.client.Preload("Comments").Find(&products)
 	return products
 }
 

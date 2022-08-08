@@ -11,6 +11,8 @@ import (
 type PermissionService interface {
 	All() []*model.Permission
 	Create(permissionDTO *dto.PermissionDTO) error
+	Update(permissionDTO *dto.PermissionDTO, id int) error
+	Delete(id int) error
 }
 
 type permissionService struct {
@@ -35,6 +37,33 @@ func (s *permissionService) Create(permissionDTO *dto.PermissionDTO) error {
 		Name: permissionDTO.Name,
 	}
 	err := s.storage.Create(permission)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *permissionService) Update(permissionDTO *dto.PermissionDTO, id int) error {
+	var oldPermission model.Permission
+	err := s.storage.FindByID(&oldPermission, id)
+	if err != nil {
+		return err
+	}
+	oldPermission.Name = permissionDTO.Name
+	err = s.storage.Update(&oldPermission)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *permissionService) Delete(id int) error {
+	var permission model.Permission
+	err := s.storage.FindByID(&permission, id)
+	if err != nil {
+		return err
+	}
+	err = s.storage.Delete(&permission)
 	if err != nil {
 		return err
 	}

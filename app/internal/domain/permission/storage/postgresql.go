@@ -9,6 +9,9 @@ import (
 type PermissionStorage interface {
 	All() []*model.Permission
 	Create(permission *model.Permission) error
+	Update(permission *model.Permission) error
+	FindByID(permission *model.Permission, id int) error
+	Delete(permission *model.Permission) error
 }
 
 type permissionStorage struct {
@@ -29,6 +32,28 @@ func (ps *permissionStorage) All() []*model.Permission {
 
 func (ps *permissionStorage) Create(permission *model.Permission) error {
 	if err := ps.client.Create(permission).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ps *permissionStorage) Update(permission *model.Permission) error {
+	if err := ps.client.Save(permission).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ps *permissionStorage) FindByID(permission *model.Permission, id int) error {
+	if err := ps.client.First(permission, id).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ps *permissionStorage) Delete(permission *model.Permission) error {
+	err := ps.client.Delete(permission).Error
+	if err != nil {
 		return err
 	}
 	return nil

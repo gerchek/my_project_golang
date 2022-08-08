@@ -34,5 +34,7 @@ func SetAllAdminRoutes(app *fiber.App, redisClient *redis.Client) {
 	permission := adminApi.Group("/permission")
 	permission.Get("/all", permissionConstructor.PermissionController.All)
 	permission.Post("/create", permissionConstructor.PermissionController.Create)
+	permission.Put("/update/:id", permissionConstructor.PermissionController.Update)
+	permission.Delete("/delete/:id", permissionConstructor.PermissionController.Delete)
 
 }

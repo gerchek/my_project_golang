@@ -3,6 +3,7 @@ package controller
 import (
 	"my_project/internal/domain/admin/dto"
 	"my_project/internal/domain/admin/service"
+	"my_project/internal/model"
 	"my_project/internal/utils/customvalidator"
 	"my_project/internal/utils/functions"
 	"my_project/internal/utils/response"
@@ -74,6 +75,11 @@ func (c *adminController) Create(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(res)
 }
 
+type response_login struct {
+	TokenDetails *model.TokenDetails `json:"tokenDetails"`
+	Userdata     *model.Admin        `json:"userdata"`
+}
+
 //Login Admin user
 func (c *adminController) Login(ctx *fiber.Ctx) error {
 	var adminLoginDTO dto.AdminLoginDTO
@@ -108,7 +114,21 @@ func (c *adminController) Login(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusBadRequest).JSON(res)
 	}
 	c.service.CreateAuth(strconv.FormatUint(userdata.ID, 10), createJwtToken)
-	return ctx.Status(http.StatusOK).JSON(createJwtToken)
+	// 1
+	// data := map[string]interface{}{
+	// 	"userdata":       userdata,
+	// 	"createJwtToken": createJwtToken,
+	// }
+	// 2
+	// var response_data response_login
+
+	// response_data.TokenDetails = createJwtToken
+	// response_data.Userdata = userdata
+
+	userdata.AccessToken = createJwtToken.AccessToken
+	userdata.RefreshToken = createJwtToken.RefreshToken
+
+	return ctx.Status(http.StatusOK).JSON(userdata)
 
 }
 

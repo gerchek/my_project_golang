@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,7 +37,14 @@ func NewApp(logger *logrus.Logger, redisClient *redis.Client) (app *fiber.App) {
 		ReadTimeout:             time.Second * 40,
 	})
 
-	// fmt.Println(redisClient)
+	// app.Use(cors.New())
+
+	app.Use(cors.New(cors.Config{
+		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin,API-KEY",
+		AllowOrigins:     "*",
+		AllowCredentials: true,
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+	}))
 
 	routes.SetAllAdminRoutes(app, redisClient)
 

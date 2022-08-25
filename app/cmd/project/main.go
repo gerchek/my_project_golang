@@ -16,7 +16,7 @@ func main() {
 	// project.NewProject(logger)
 
 	logger.Info("initializing postgres config...")
-	gormConfig := gormclient.NewGormConfig("postgres", "postgres", "127.0.0.1", "5432", "my_project")
+	gormConfig := gormclient.NewGormConfig("newuser", "newpassword", "127.0.0.1", "5432", "my_project")
 
 	logger.Info("connecting to postgres database...")
 	client, err := gormclient.NewClient(gormConfig)

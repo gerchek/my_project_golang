@@ -10,8 +10,8 @@ import (
 
 type PermissionService interface {
 	All() []*model.Permission
-	Create(permissionDTO *dto.PermissionDTO) error
-	Update(permissionDTO *dto.PermissionDTO, id int) error
+	Create(permissionDTO *dto.PermissionDTO) (data *model.Permission, err error)
+	Update(permissionDTO *dto.PermissionDTO, id int) (data *model.Permission, err error)
 	Delete(id int) error
 }
 
@@ -32,29 +32,30 @@ func (s *permissionService) All() []*model.Permission {
 	return s.storage.All()
 }
 
-func (s *permissionService) Create(permissionDTO *dto.PermissionDTO) error {
+func (s *permissionService) Create(permissionDTO *dto.PermissionDTO) (data *model.Permission, err error) {
 	permission := &model.Permission{
 		Name: permissionDTO.Name,
 	}
-	err := s.storage.Create(permission)
+	data, err = s.storage.Create(permission)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return data, nil
 }
 
-func (s *permissionService) Update(permissionDTO *dto.PermissionDTO, id int) error {
+func (s *permissionService) Update(permissionDTO *dto.PermissionDTO, id int) (data *model.Permission, err error) {
 	var oldPermission model.Permission
-	err := s.storage.FindByID(&oldPermission, id)
+	// var data model.Permission
+	err = s.storage.FindByID(&oldPermission, id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	oldPermission.Name = permissionDTO.Name
-	err = s.storage.Update(&oldPermission)
+	data, err = s.storage.Update(&oldPermission)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return data, nil
 }
 
 func (s *permissionService) Delete(id int) error {

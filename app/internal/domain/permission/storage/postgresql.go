@@ -8,8 +8,8 @@ import (
 
 type PermissionStorage interface {
 	All() []*model.Permission
-	Create(permission *model.Permission) error
-	Update(permission *model.Permission) error
+	Create(permission *model.Permission) (data *model.Permission, err error)
+	Update(permission *model.Permission) (data *model.Permission, err error)
 	FindByID(permission *model.Permission, id int) error
 	Delete(permission *model.Permission) error
 }
@@ -30,18 +30,18 @@ func (ps *permissionStorage) All() []*model.Permission {
 	return permissions
 }
 
-func (ps *permissionStorage) Create(permission *model.Permission) error {
+func (ps *permissionStorage) Create(permission *model.Permission) (data *model.Permission, err error) {
 	if err := ps.client.Create(permission).Error; err != nil {
-		return err
+		return permission, err
 	}
-	return nil
+	return permission, nil
 }
 
-func (ps *permissionStorage) Update(permission *model.Permission) error {
+func (ps *permissionStorage) Update(permission *model.Permission) (data *model.Permission, err error) {
 	if err := ps.client.Save(permission).Error; err != nil {
-		return err
+		return permission, err
 	}
-	return nil
+	return permission, nil
 }
 
 func (ps *permissionStorage) FindByID(permission *model.Permission, id int) error {

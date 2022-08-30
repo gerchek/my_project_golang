@@ -34,7 +34,7 @@ func (as *adminStorage) All() []*model.Admin {
 }
 
 func (as *adminStorage) FindByUsername(admin *model.Admin, username string) error {
-	if err := as.client.Where("username = ?", username).First(admin).Error; err != nil {
+	if err := as.client.Where("username = ?", username).Preload("MyComments").Preload("MyProducts.Comments").Preload("Roles.Permissions").Preload("Roles").First(admin).Error; err != nil {
 		return err
 	}
 	return nil

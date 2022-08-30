@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"my_project/internal/domain/role/dto"
 	"my_project/internal/model"
 
@@ -49,10 +48,13 @@ func (rs *roleStorage) FindByID(role *model.Role, id int) error {
 
 func (rs *roleStorage) Update(role *model.Role, roleDTO *dto.RoleDTO) error {
 	if err := rs.client.Save(role).Association("Permissions").Append(roleDTO.Permissions_append); err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
+		return err
 	}
 	if err := rs.client.Model(&role).Association("Permissions").Delete(roleDTO.Permissions_delete); err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
+		return err
+
 	}
 	return nil
 }

@@ -50,12 +50,12 @@ func (c *permissionController) Create(ctx *fiber.Ctx) error {
 		res := response.Error("Validation error", err.Error(), nil)
 		return ctx.Status(http.StatusBadRequest).JSON(res)
 	}
-	err = c.service.Create(&permissionCreateDTO)
+	data, err := c.service.Create(&permissionCreateDTO)
 	if err != nil {
 		res := response.Error("Couldn't create", err.Error(), nil)
 		return ctx.Status(http.StatusBadRequest).JSON(res)
 	}
-	res := response.Success(true, "Success", nil)
+	res := response.Success(true, "Success", data)
 	return ctx.Status(http.StatusOK).JSON(res)
 }
 
@@ -82,7 +82,7 @@ func (c *permissionController) Update(ctx *fiber.Ctx) error {
 		res := response.Error("Validation error", err.Error(), nil)
 		return ctx.Status(http.StatusBadRequest).JSON(res)
 	}
-	err = c.service.Update(&permissionUpdateDTO, id)
+	data, err := c.service.Update(&permissionUpdateDTO, id)
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -93,7 +93,7 @@ func (c *permissionController) Update(ctx *fiber.Ctx) error {
 			return ctx.Status(http.StatusInternalServerError).JSON(res)
 		}
 	}
-	res := response.Success(true, "Success", nil)
+	res := response.Success(true, "Success", data)
 	return ctx.Status(http.StatusOK).JSON(res)
 }
 
@@ -119,6 +119,6 @@ func (c *permissionController) Delete(ctx *fiber.Ctx) error {
 			return ctx.Status(http.StatusInternalServerError).JSON(res)
 		}
 	}
-	res := response.Success(true, "Success", nil)
+	res := response.Success(true, "Success", id)
 	return ctx.Status(http.StatusOK).JSON(res)
 }

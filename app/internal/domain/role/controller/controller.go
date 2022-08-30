@@ -96,6 +96,7 @@ func (c *roleController) Update(ctx *fiber.Ctx) error {
 			return ctx.Status(http.StatusInternalServerError).JSON(res)
 		}
 	}
+
 	res := response.Success(true, "Success", nil)
 	return ctx.Status(http.StatusOK).JSON(res)
 }

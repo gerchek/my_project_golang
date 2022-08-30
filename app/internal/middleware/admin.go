@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"my_project/internal/utils/response"
 	"net/http"
 	"strings"
@@ -31,7 +32,9 @@ func IsAdminAuthenticate(redis *redis.Client) fiber.Handler {
 			res := response.Error("Error", "Invalid token or token not found 1", nil)
 			return ctx.Status(http.StatusUnauthorized).JSON(res)
 		}
+		// fmt.Println(authHeader)
 		headerParts := strings.Split(authHeader, " ")
+		fmt.Println(headerParts[0])
 		if len(headerParts) != 2 {
 			res := response.Error("Error", "Invalid token or token not found 2", nil)
 			return ctx.Status(http.StatusUnauthorized).JSON(res)
